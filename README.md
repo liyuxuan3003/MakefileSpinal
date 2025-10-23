@@ -1,0 +1,3 @@
+# MakefileSpinal
+
+MakefileSpinal是一个适用于SpinalHDL项目的Makefile。
