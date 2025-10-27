@@ -28,10 +28,12 @@ TOP?=TopLevel
 TARGET?=${TOP}
 
 # Source files of spinal (*.scala)
-SRCS_SPINAL?=$(wildcard *.scala)
+SRCS_SPINAL_EXTRA?=
+SRCS_SPINAL?=$(wildcard *.scala) ${SRCS_SPINAL_EXTRA}
 
 # Source files of xilinx design constraints (*.xdc)
-SRCS_XDC?=$(wildcard *.xdc)
+SRCS_XDC_EXTRA?=
+SRCS_XDC?=$(wildcard *.xdc) ${SRCS_XDC_EXTRA}
 
 PLATFORM?=
 
