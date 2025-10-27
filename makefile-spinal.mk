@@ -35,6 +35,8 @@ SRCS_XDC?=$(wildcard *.xdc)
 
 PLATFORM?=
 
+FLASH?=
+
 # Application name of verilog generator
 APP_VERILOG?=${PROJECT}.${TARGET}Verilog
 # Application name of vhdl generator
@@ -50,11 +52,15 @@ GEN_VHDL?=${BUILD_DIR_HDL}/${TARGET}.vhdl
 WAVE?=${BUILD_DIR_SIM}/${TARGET}/test/wave.fst
 # Bitstream
 BITSTREAM?=${BUILD_DIR_VIVADO}/${TARGET}.bit
+# Bin file
+BINFILE?=${BUILD_DIR_VIVADO}/${TARGET}.bin
 
 # Tcl for generate bitstream
 TCL_BITSTREAM?=${THIS_DIR}/vivado-bitstream.tcl
 # Tcl for program fpga
-TCL_BURN?=${THIS_DIR}/vivado-burn.tcl
+TCL_PROGRAM?=${THIS_DIR}/vivado-program.tcl
+PROGRAM_TYPE_BURN?=burn
+PROGRAM_TYPE_LOAD?=load
 
 # SBT
 SBT?=sbt
@@ -76,7 +82,7 @@ endef
 
 # --------------------------------
 # Declare phony tasks
-.PHONY: default run clean clean-all verilog vhdl sim gtkwave bitstream burn
+.PHONY: default run clean clean-all verilog vhdl sim gtkwave bitstream binfile load burn
 
 default: verilog
 	${NOTIFY_DONE}
@@ -108,10 +114,23 @@ gtkwave: ${WAVE}
 bitstream: ${BITSTREAM}
 	${NOTIFY_DONE}
 
-burn: ${BITSTREAM}
+binfile: ${BINFILE}
+	${NOTIFY_DONE}
+
+load: ${BITSTREAM}
 	cd ${BUILD_DIR_VIVADO} && \
-	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_BURN})" -tclargs \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${BITSTREAM})"
+	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_PROGRAM})" -tclargs \
+		"$(addprefix ${RELP_BACK_VIVADO}/,${BITSTREAM})" \
+		"${FLASH}" \
+		"${PROGRAM_TYPE_LOAD}"
+	${NOTIFY_DONE}
+
+burn: ${BINFILE}
+	cd ${BUILD_DIR_VIVADO} && \
+	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_PROGRAM})" -tclargs \
+		"$(addprefix ${RELP_BACK_VIVADO}/,${BINFILE})" \
+		"${FLASH}" \
+		"${PROGRAM_TYPE_BURN}"
 	${NOTIFY_DONE}
 
 # --------------------------------
@@ -151,12 +170,13 @@ ${WAVE}: ${SRCS_SPINAL} | ${BUILD_DIR_SIM}
 	${NOTIFY_DONE}
 
 # Generate bitstream
-${BITSTREAM}: ${GEN_VERILOG} ${SRCS_XDC} | ${BUILD_DIR_VIVADO}
+${BITSTREAM} ${BINFILE}: ${GEN_VERILOG} ${SRCS_XDC} | ${BUILD_DIR_VIVADO}
 	cd ${BUILD_DIR_VIVADO} && \
 	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_BITSTREAM})" -tclargs \
 		"$(addprefix ${RELP_BACK_VIVADO}/,${GEN_VERILOG})" \
 		"$(addprefix ${RELP_BACK_VIVADO}/,${SRCS_XDC})" \
 		"${TARGET}" \
 		"${PLATFORM}" \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${BITSTREAM})"
+		"$(addprefix ${RELP_BACK_VIVADO}/,${BITSTREAM})" \
 	${NOTIFY_DONE}
+	

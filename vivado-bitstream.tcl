@@ -12,6 +12,6 @@ opt_design
 place_design
 route_design
 
-write_bitstream -force $bitstream
+write_bitstream -bin_file -force $bitstream
 
 exit
