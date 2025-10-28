@@ -46,6 +46,9 @@ APP_VHDL?=${PROJECT}.${TARGET}Vhdl
 # Application name of simulation
 APP_SIM?=${PROJECT}.${TARGET}Sim
 
+# GTKWave config file
+GTKW_CONFIG?=$(wildcard ${TARGET}.gtkw)
+
 # Generated verilog 
 GEN_VERILOG?=${BUILD_DIR_HDL}/${TARGET}.v
 # Generated vhdl
@@ -109,8 +112,8 @@ vhdl: ${GEN_VHDL}
 sim: ${WAVE}
 	${NOTIFY_DONE}
 
-gtkwave: ${WAVE}
-	${GTKWAVE} ${GTKWAVE_FLAGS} ${WAVE}
+gtkwave: ${WAVE} ${GTKW_CONFIG}
+	${GTKWAVE} ${GTKWAVE_FLAGS} ${WAVE} ${GTKW_CONFIG}
 	${NOTIFY_DONE}
 
 bitstream: ${BITSTREAM}
