@@ -48,6 +48,9 @@ read_xdc $srcs_xdc
 # Synthesis design
 synth_design -top $module_top -part $platform
 
+# Write netlist
+write_verilog -force $netlist
+
 # Optimize design
 opt_design
 
@@ -59,9 +62,6 @@ route_design
 
 # Generate .bit and .bin file
 write_bitstream -bin_file -force $bitstream
-
-# Write netlist
-write_verilog -force $netlist
 
 # Write checkpoint
 write_checkpoint -force $checkpoint
