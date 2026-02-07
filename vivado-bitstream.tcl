@@ -35,6 +35,9 @@ place_design
 # Route design
 route_design
 
+# Write checkpoint
+write_checkpoint $module_top.dcp
+
 # Generate .bit and .bin file
 write_bitstream -bin_file -force $bitstream
 
