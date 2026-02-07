@@ -13,7 +13,7 @@ BUILD_DIR_SIM?=${BUILD_DIR}/sim
 # Build directory for vivado bitstream
 BUILD_DIR_VIVADO?=${BUILD_DIR}/vivado
 # Relative path to current dir when in vivado build dir
-RELP_BACK_VIVADO?=$(shell realpath --relative-to=${BUILD_DIR_VIVADO} .)
+RELP_BACK?=../..
 
 # Get current dir
 CURR_DIR?=$(shell pwd)
@@ -55,10 +55,27 @@ GEN_VERILOG?=${BUILD_DIR_HDL}/${TARGET}.v
 GEN_VHDL?=${BUILD_DIR_HDL}/${TARGET}.vhdl
 # Simulated wave
 WAVE?=${BUILD_DIR_SIM}/${TARGET}/test/wave.fst
-# Bitstream
+# Bitstream (for load)
 BITSTREAM?=${BUILD_DIR_VIVADO}/${TARGET}.bit
-# Bin file
+# Binfile (for burn)
 BINFILE?=${BUILD_DIR_VIVADO}/${TARGET}.bin
+# Netlist
+NETLIST?=${BUILD_DIR_VIVADO}/${TARGET}.netlist.v
+# Checkpoint
+CHECKPOINT?=${BUILD_DIR_VIVADO}/${TARGET}.dcp
+
+BITSTREAM_LOG?=${BUILD_DIR_VIVADO}/vivado_bitstream.log
+BITSTREAM_JOU?=${BUILD_DIR_VIVADO}/vivado_bitstream.jou
+
+PROGRAM_LOG?=${BUILD_DIR_VIVADO}/vivado_program.log
+PROGRAM_JOU?=${BUILD_DIR_VIVADO}/vivado_program.jou
+
+RPT_TIMING_SUMMARY?=${BUILD_DIR_VIVADO}/timing_summary.rpt
+RPT_TIMING?=${BUILD_DIR_VIVADO}/timing.rpt
+RPT_CLOCK?=${BUILD_DIR_VIVADO}/clock.rpt
+RPT_UTILI?=${BUILD_DIR_VIVADO}/utili.rpt
+RPT_POWER?=${BUILD_DIR_VIVADO}/power.rpt
+RPT_DRC?=${BUILD_DIR_VIVADO}/drc.rpt
 
 # Tcl for generate bitstream
 TCL_BITSTREAM?=${THIS_DIR}/vivado-bitstream.tcl
@@ -118,24 +135,33 @@ gtkwave: ${WAVE} ${GTKW_CONFIG}
 	${GTKWAVE} ${GTKWAVE_FLAGS} ${WAVE} ${GTKW_CONFIG}
 	${NOTIFY_DONE}
 
-bitstream: ${BITSTREAM}
+bitstream: ${BITSTREAM} ${BINFILE}
 	${NOTIFY_DONE}
 
-binfile: ${BINFILE}
-	${NOTIFY_DONE}
-
-load: ${BITSTREAM}
+load: ${BITSTREAM} ${TCL_PROGRAM}
+	-rm ${PROGRAM_JOU}
+	-rm ${PROGRAM_LOG}
 	cd ${BUILD_DIR_VIVADO} && \
-	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_PROGRAM})" -tclargs \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${BITSTREAM})" \
+	${VIVADO} ${VIVADO_FLAGS} \
+	-source  "${RELP_BACK}/${TCL_PROGRAM}" \
+	-journal "${RELP_BACK}/${PROGRAM_JOU}" \
+	-log     "${RELP_BACK}/${PROGRAM_LOG}" \
+	-tclargs \
+		"${RELP_BACK}/${BITSTREAM}" \
 		"${FLASH}" \
 		"${PROGRAM_TYPE_LOAD}"
 	${NOTIFY_DONE}
 
-burn: ${BINFILE}
+burn: ${BINFILE} ${TCL_PROGRAM}
+	-rm ${PROGRAM_JOU}
+	-rm ${PROGRAM_LOG}
 	cd ${BUILD_DIR_VIVADO} && \
-	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_PROGRAM})" -tclargs \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${BINFILE})" \
+	${VIVADO} ${VIVADO_FLAGS} \
+	-source  "${RELP_BACK}/${TCL_PROGRAM}" \
+	-journal "${RELP_BACK}/${PROGRAM_JOU}" \
+	-log     "${RELP_BACK}/${PROGRAM_LOG}" \
+	-tclargs \
+		"${RELP_BACK}/${BITSTREAM}" \
 		"${FLASH}" \
 		"${PROGRAM_TYPE_BURN}"
 	${NOTIFY_DONE}
@@ -180,13 +206,27 @@ ${WAVE}: ${SRCS_SPINAL} | ${BUILD_DIR_SIM}
 	${NOTIFY_DONE}
 
 # Generate bitstream
-${BITSTREAM} ${BINFILE}: ${GEN_VERILOG} ${SRCS_XDC} | ${BUILD_DIR_VIVADO}
+${BITSTREAM} ${BINFILE}: ${GEN_VERILOG} ${SRCS_XDC} ${TCL_BITSTREAM} | ${BUILD_DIR_VIVADO}
+	-rm ${BITSTREAM_JOU}
+	-rm ${BITSTREAM_LOG}
 	cd ${BUILD_DIR_VIVADO} && \
-	${VIVADO} ${VIVADO_FLAGS} -source "$(addprefix ${RELP_BACK_VIVADO}/,${TCL_BITSTREAM})" -tclargs \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${GEN_VERILOG})" \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${SRCS_XDC})" \
+	${VIVADO} ${VIVADO_FLAGS} \
+	-source  "${RELP_BACK}/${TCL_BITSTREAM}" \
+	-journal "${RELP_BACK}/${BITSTREAM_JOU}" \
+	-log     "${RELP_BACK}/${BITSTREAM_LOG}" \
+	-tclargs \
+		"$(addprefix ${RELP_BACK}/,${GEN_VERILOG})" \
+		"$(addprefix ${RELP_BACK}/,${SRCS_XDC})" \
 		"${TARGET}" \
 		"${PLATFORM}" \
-		"$(addprefix ${RELP_BACK_VIVADO}/,${BITSTREAM})" \
+		"${RELP_BACK}/${BITSTREAM}" \
+		"${RELP_BACK}/${NETLIST}" \
+		"${RELP_BACK}/${CHECKPOINT}" \
+		"${RELP_BACK}/${RPT_TIMING_SUMMARY}" \
+		"${RELP_BACK}/${RPT_TIMING}" \
+		"${RELP_BACK}/${RPT_CLOCK}" \
+		"${RELP_BACK}/${RPT_UTILI}" \
+		"${RELP_BACK}/${RPT_POWER}" \
+		"${RELP_BACK}/${RPT_DRC}"
 	${NOTIFY_DONE}
 	
