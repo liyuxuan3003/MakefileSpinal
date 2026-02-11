@@ -78,8 +78,7 @@ GTKWAVE_FLAGS?=--dark
 
 # Vivado
 VIVADO?=vivado
-VIVADO_FLAGS?=-mode batch -nolog -nojournal
-
+VIVADO_FLAGS?=-mode batch
 
 # --------------------------------
 # Notification at the end of the task
