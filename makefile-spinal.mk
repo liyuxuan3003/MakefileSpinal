@@ -67,8 +67,10 @@ TCL_PROGRAM?=${THIS_DIR}/vivado-program.tcl
 PROGRAM_TYPE_BURN?=burn
 PROGRAM_TYPE_LOAD?=load
 
-# SBT
+# Sbt
 SBT?=sbt
+ARGS?=
+PRE_BUILD_CMD?=
 
 # GTKWave
 GTKWAVE?=gtkwave
@@ -77,6 +79,7 @@ GTKWAVE_FLAGS?=--dark
 # Vivado
 VIVADO?=vivado
 VIVADO_FLAGS?=-mode batch -nolog -nojournal
+
 
 # --------------------------------
 # Notification at the end of the task
@@ -161,17 +164,20 @@ ${BUILD_DIR_VIVADO}: | ${BUILD_DIR}
 
 # Generate verilog from scala
 ${GEN_VERILOG}: ${SRCS_SPINAL} | ${BUILD_DIR_HDL}
-	${SBT} "runMain ${APP_VERILOG}"
+	${PRE_BUILD_CMD}
+	${SBT} "runMain ${APP_VERILOG} ${ARGS}"
 	${NOTIFY_DONE}
 
 # Generate vhdl from scala
 ${GEN_VHDL}: ${SRCS_SPINAL} | ${BUILD_DIR_HDL}
-	${SBT} "runMain ${APP_VHDL}"
+	${PRE_BUILD_CMD}
+	${SBT} "runMain ${APP_VHDL} ${ARGS}"
 	${NOTIFY_DONE}
 
 # Generate wave
 ${WAVE}: ${SRCS_SPINAL} | ${BUILD_DIR_SIM}
-	${SBT} "runMain ${APP_SIM}"
+	${PRE_BUILD_CMD}
+	${SBT} "runMain ${APP_SIM} ${ARGS}"
 	${NOTIFY_DONE}
 
 # Generate bitstream
