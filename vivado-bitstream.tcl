@@ -60,12 +60,6 @@ place_design
 # Route design
 route_design
 
-# Generate .bit and .bin file
-write_bitstream -bin_file -force $bitstream
-
-# Write checkpoint
-write_checkpoint -force $checkpoint
-
 # Report timing summary
 report_timing_summary -file $rpt_timing_summary
 
@@ -83,5 +77,11 @@ report_power -file $rpt_power
 
 # Report drc
 report_drc -file $rpt_drc
+
+# Generate .bit and .bin file
+write_bitstream -bin_file -force $bitstream
+
+# Write checkpoint
+write_checkpoint -force $checkpoint
 
 exit
