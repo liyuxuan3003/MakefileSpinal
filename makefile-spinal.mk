@@ -161,7 +161,7 @@ burn: ${BINFILE} ${TCL_PROGRAM}
 	-journal "${RELP_BACK}/${PROGRAM_JOU}" \
 	-log     "${RELP_BACK}/${PROGRAM_LOG}" \
 	-tclargs \
-		"${RELP_BACK}/${BITSTREAM}" \
+		"${RELP_BACK}/${BINFILE}" \
 		"${FLASH}" \
 		"${PROGRAM_TYPE_BURN}"
 	${NOTIFY_DONE}
