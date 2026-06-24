@@ -64,7 +64,7 @@ route_design
 report_timing_summary -file $rpt_timing_summary
 
 # Report timing
-report_timing -sort_by group -max_paths 100 -path_type summary -file $rpt_timing
+report_timing -sort_by group -max_paths 100 -path_type full -file $rpt_timing
 
 # Report clock
 report_clock_utilization -file $rpt_clock
